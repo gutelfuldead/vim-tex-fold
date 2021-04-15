@@ -7,8 +7,20 @@
 
 "{{{ Globals
 
+if !exists('g:tex_fold_chap_char')
+    let g:tex_fold_chap_char = '➜'
+endif
+
 if !exists('g:tex_fold_sec_char')
-    let g:tex_fold_sec_char = '➜'
+    let g:tex_fold_sec_char = '➜➜'
+endif
+
+if !exists('g:tex_fold_subsec_char')
+    let g:tex_fold_subsec_char = '➜➜➜'
+endif
+
+if !exists('g:tex_fold_subsubsec_char')
+    let g:tex_fold_subsubsec_char = '➜➜➜➜'
 endif
 
 if !exists('g:tex_fold_env_char')
@@ -54,16 +66,20 @@ function! TeXFold(lnum)
         \['frame', 'table', 'figure', 'align', 'lstlisting']: []
     let envs = '\(' . join(default_envs + g:tex_fold_additional_envs, '\|') . '\)'
 
-    if line =~ '^\s*\\section'
+    if line =~ '^\s*\\chapter'
         return '>1'
     endif
 
-    if line =~ '^\s*\\subsection'
+    if line =~ '^\s*\\section'
         return '>2'
     endif
 
-    if line =~ '^\s*\\subsubsection'
+    if line =~ '^\s*\\subsection'
         return '>3'
+    endif
+
+    if line =~ '^\s*\\subsubsection'
+        return '>4'
     endif
 
     if !g:tex_fold_ignore_envs
@@ -92,9 +108,18 @@ endfunction
 function! TeXFoldText()
     let fold_line = getline(v:foldstart)
 
-    if fold_line =~ '^\s*\\\(sub\)*section'
-        let pattern = '\\\(sub\)*section\*\={\([^}]*\)}'
-        let repl = ' ' . g:tex_fold_sec_char . ' \2'
+    if fold_line =~ '^\s*\\chapter'
+        let pattern = '\\chapter\*\={\([^}]*\)}'
+        let repl = ' ' . g:tex_fold_chap_char . ' \1'
+    elseif fold_line =~ '^\s*\\section'
+        let pattern = '\\section\*\={\([^}]*\)}'
+        let repl = ' ' . g:tex_fold_sec_char . ' \1'
+    elseif fold_line =~ '^\s*\\subsection'
+        let pattern = '\\subsection\*\={\([^}]*\)}'
+        let repl = ' ' . g:tex_fold_subsec_char . ' \1'
+    elseif fold_line =~ '^\s*\\subsubsection'
+        let pattern = '\\subsubsection\*\={\([^}]*\)}'
+        let repl = ' ' . g:tex_fold_subsubsec_char . ' \1'
     elseif fold_line =~ '^\s*\\begin'
         let pattern = '\\begin{\([^}]*\)}'
         let repl = ' ' . g:tex_fold_env_char . ' \1'
